@@ -1,6 +1,6 @@
 ---
 title: "Lab 04 Ridge, Lasso, Elastic Net"
-author: "Lucy D'Agostino McGowan"
+author: "Andy Jiang"
 date: "2020-03-05"
 output: html_document
 ---
@@ -11,4 +11,43 @@ output: html_document
 library(tidyverse) 
 library(tidymodels)
 ```
+
+```{r split dataset into two}
+music<- read.csv("music.csv",header = TRUE)
+
+set.seed(7)
+
+music_split <- initial_split(music, prop=0.5)
+music_split
+
+music_test <- testing(music_split)
+
+music_train <- training(music_split)
+```
+
+As we can see, there are 73 variables in both the training and the testing dataset. Both have 250 observations each. 
+
+
+```{r fitting linear model on lat}
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
