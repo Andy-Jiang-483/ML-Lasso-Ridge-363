@@ -57,19 +57,46 @@ The testing root men squared error obtained is 18.616
 
 
 
-```{r}
-music_cv <- vfold_cv(music, 10)
-ridge_spec <- linear_reg(penalty = 100, mixture = 0)%>%
+```{r finding appropriate penalty in the 10s neighborhood}
+set.seed(7)
+music_cv <- vfold_cv(music_train, 10)
+ridge_spec <- linear_reg(penalty = tune(), mixture = 0)%>%
   set_engine("glmnet")
 
-rec <- recipe(lat ~., data = music)%>%
+rec <- recipe(lat ~., data = music_train)%>%
   step_scale(all_predictors())
 
-results <- fit_resamples(lm_spec,
-                         preprocessor = rec,
-                         resamples = music_cv)
+
+
+grid<-expand_grid(penalty = seq(0,100, by =10))
+
+tuning <- tune_grid(ridge_spec,
+                    preprocessor = rec,
+                    grid = grid,
+                    resamples = music_cv)
+
+tuning %>%
+  collect_metrics()%>%
+  filter(.metric== "rmse")%>%
+  arrange(mean)
 
 ```
+Based on the table above, we can see that when the penalty is between 10 -20, the rmse is the lowest. Thus, we will repeat the tuning process to choose a penalty between 10-20. 
+
+```{r locate penalty}
+grid = expand_grid(penalty = seq(10,20, by =1))
+tuning <- tune_grid(ridge_spec,
+                    preprocessor = rec,
+                    grid = grid,
+                    resamples = music_cv)
+
+tuning%>%
+  collect_metrics()%>%
+  filter(.metric == "rmse")%>%
+  arrange(mean)
+```
+
+It appears that when $\lambda = 12$ the test rmse is the smallest. The test rmse is 17.546. I will choose $\lambda$ to be 12, because this is when the test rmse become the smallest. 
 
 
 
