@@ -55,19 +55,20 @@ The testing root men squared error obtained is 18.616
 
 ### Exercise 3
 
-```{r}
-set.seed(7)
-lm_fit <- last_fit(lm_spec,
-                   lat~.,
-                   split = music_split)
-```
 
 
 ```{r}
 music_cv <- vfold_cv(music, 10)
+ridge_spec <- linear_reg(penalty = 100, mixture = 0)%>%
+  set_engine("glmnet")
+
+rec <- recipe(lat ~., data = music)%>%
+  step_scale(all_predictors())
+
 results <- fit_resamples(lm_spec,
-                         lat~.,
+                         preprocessor = rec,
                          resamples = music_cv)
+
 ```
 
 
