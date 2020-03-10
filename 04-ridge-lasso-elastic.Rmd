@@ -12,6 +12,8 @@ library(tidyverse)
 library(tidymodels)
 ```
 
+### Exercise 1
+
 ```{r split dataset into two}
 music<- read.csv("music.csv",header = TRUE)
 
@@ -27,18 +29,46 @@ music_train <- training(music_split)
 
 As we can see, there are 73 variables in both the training and the testing dataset. Both have 250 observations each. 
 
+### Exercise 2
 
 ```{r fitting linear model on lat}
 
+lm_spec <-
+  linear_reg()%>%
+  set_engine(engine = "lm")
+lm_spec
+ols_train <- fit(lm_spec,
+                 lat~.,
+                 data = music_train)
+
+ols_train
+lat_pred<-ols_train %>%
+  predict(new_data = music_test)%>%
+  bind_cols(music_test)
+lat_pred %>%
+  rmse(truth=lat,estimate=.pred)
 
 
 ```
 
+The testing root men squared error obtained is 18.616
+
+### Exercise 3
+
+```{r}
+set.seed(7)
+lm_fit <- last_fit(lm_spec,
+                   lat~.,
+                   split = music_split)
+```
 
 
-
-
-
+```{r}
+music_cv <- vfold_cv(music, 10)
+results <- fit_resamples(lm_spec,
+                         lat~.,
+                         resamples = music_cv)
+```
 
 
 
