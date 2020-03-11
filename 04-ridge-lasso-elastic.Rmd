@@ -14,7 +14,7 @@ library(tidymodels)
 
 ### Exercise 1
 
-```{r split dataset into two}
+```{r split-dataset-into-two}
 music<- read.csv("music.csv",header = TRUE)
 
 set.seed(7)
@@ -31,7 +31,7 @@ As we can see, there are 73 variables in both the training and the testing datas
 
 ### Exercise 2
 
-```{r fitting linear model on lat}
+```{r fitting-linear-model-on-lat}
 
 lm_spec <-
   linear_reg()%>%
@@ -55,9 +55,10 @@ The testing root men squared error obtained is 18.616
 
 ### Exercise 3
 
+$@$ for 3-5 how do i use the testing portion of the initially split data. 
 
 
-```{r finding appropriate penalty in the 10s neighborhood}
+```{r finding-appropriate-penalty-in-the-10s-neighborhood}
 set.seed(7)
 music_cv <- vfold_cv(music_train, 10)
 ridge_spec <- linear_reg(penalty = tune(), mixture = 0)%>%
@@ -83,7 +84,7 @@ tuning %>%
 ```
 Based on the table above, we can see that when the penalty is between 10 -20, the rmse is the lowest. Thus, we will repeat the tuning process to choose a penalty between 10-20. 
 
-```{r locate penalty}
+```{r locate-penalty}
 grid = expand_grid(penalty = seq(10,20, by =1))
 tuning <- tune_grid(ridge_spec,
                     preprocessor = rec,
@@ -94,16 +95,112 @@ tuning%>%
   collect_metrics()%>%
   filter(.metric == "rmse")%>%
   arrange(mean)
+
+
+
 ```
 
 It appears that when $\lambda = 12$ the test rmse is the smallest. The test rmse is 17.546. I will choose $\lambda$ to be 12, because this is when the test rmse become the smallest. 
 
+###Exercise 4
+
+```{r choosing-penalty-for-lasso}
+set.seed(7)
+lasso_spec <- linear_reg(penalty = tune(), mixture = 1)%>%
+  set_engine("glmnet")
+
+grid <- expand_grid(penalty = seq(0,100, by = 1))
+
+results <- tune_grid(lasso_spec, 
+                    rec,
+                    grid = grid, 
+                    resamples = music_cv)
+results %>%
+  collect_metrics()%>%
+  filter(.metric == "rmse")%>%
+  arrange(mean)
+
+```
+
+It appears that when the penalty is 1, the test rmse is the lowest. The test rmse when the penalty is 1 is 17.356
+
+###Exercise 5
+
+```{r elastic-net-graph-with-penalty-is-[0,100]}
+set.seed(7)
+elasticNet_spec <- linear_reg(penalty = tune(), mixture = tune())%>%
+  set_engine("glmnet")
+
+grid <- expand_grid(penalty=seq(0,100, by = 10), mixture = seq(0,1,by = 0.1))
+
+results <- tune_grid(elasticNet_spec, 
+                    rec,
+                    grid = grid, 
+                    resamples = music_cv)
+results %>%
+  collect_metrics()%>%
+  filter(.metric == "rmse")%>%
+  ggplot(aes(penalty, mean, color = factor(mixture), group = factor(mixture))) + 
+  geom_line() + 
+  geom_point()+
+  labs(y = "RMSE")
+
+
+```
+
+As we can see from the graph, when the $\lambda$ is less than 25, all 10 models with differnet $\alpha$ level yield the lowest testing RMSE. Thus, we will restrict $\lambda$ to [0,25]. 
+
+
+```{r elastic-net-graph-with-penalty-is-[0,20]}
+grid <- expand_grid(penalty=seq(0,20, by = 1), mixture = seq(0,1,by = 0.1))
+
+results <- tune_grid(elasticNet_spec, 
+                     preprocessor = rec,
+                     grid = grid, 
+                     resamples = music_cv)
 
 
 
+results %>%
+  collect_metrics()%>%
+  filter(.metric == "rmse")%>%
+  ggplot(aes(penalty, mean, color = factor(mixture), group = factor(mixture))) + 
+  geom_line() + 
+  geom_point()+
+  labs(y = "RMSE")
+
+```
+
+As we can see from the graph, the lowest testing rmse occured when the penalty is below 5. Thus, we will restrict our search to $\lambda\in[0,5]$
+
+```{r elastic-net-graph-with-penalty-is-[0,5]}
+grid <- expand_grid(penalty=seq(0,5, by = 1), mixture = seq(0,1,by = 0.1))
+
+results <- tune_grid(elasticNet_spec, 
+                     preprocessor = rec,
+                     grid = grid, 
+                     resamples = music_cv)
 
 
 
+results %>%
+  collect_metrics()%>%
+  filter(.metric == "rmse")%>%
+  ggplot(aes(penalty, mean, color = factor(mixture), group = factor(mixture))) + 
+  geom_line() + 
+  geom_point()+
+  labs(y = "RMSE")
+
+results %>%
+  collect_metrics()%>%
+  filter(.metric == "rmse")%>%
+  arrange(mean)
+```
+
+By examing the table, we can see that when $\lambda$ is 1 and when $\alpha$ is 1, the elastic net yields the lowest test rmse of 17.356. 
+
+
+### Exercise 6
 
 
 
