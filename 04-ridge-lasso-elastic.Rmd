@@ -202,7 +202,9 @@ By examing the table, we can see that when $\lambda$ is 1 and when $\alpha$ is 1
 
 ### Exercise 6
 
+In the previous exercise, our elastic net has a test rmse of 17.356. RMSE can be used to measure model fit. As the square root of a variance, RMSE illustrates the standard deviation of the unexplained variance. 17.356 is relatively low, thus, it shows that our model fit is relatively good. It means that the square root of the average of squared differences between our predicted latitude and the actual latitud eis 17.356 degrees. 
 
+There isn't much differences among the 4 different approaches. 
 
 
 
