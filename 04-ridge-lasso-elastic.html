@@ -511,9 +511,27 @@ tuning%&gt;%
 ##  9      18 rmse    standard    17.6    10   0.470
 ## 10      19 rmse    standard    17.6    10   0.472
 ## 11      20 rmse    standard    17.6    10   0.475</code></pre>
-<p>It appears that when <span class="math inline">\(\lambda = 12\)</span> the test rmse is the smallest. The test rmse is 17.546. I will choose <span class="math inline">\(\lambda\)</span> to be 12, because this is when the test rmse become the smallest.</p>
+<pre class="r"><code>ridge_spec &lt;- linear_reg(penalty = 12, mixture = 0)%&gt;%
+  set_engine(&quot;glmnet&quot;)
+
+ridge_fit &lt;- fit(ridge_spec, 
+                 lat~.,
+                 data = music_train)
+
+ridge_pred &lt;- ridge_fit %&gt;%
+  predict(new_data = music_test)%&gt;%
+  bind_cols(music_test)
+
+ridge_pred %&gt;%
+  rmse(truth = lat, estimate = .pred)</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   .metric .estimator .estimate
+##   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+## 1 rmse    standard        16.5</code></pre>
+<p>When <span class="math inline">\(\lambda\)</span> is 12, the test root mean squared error is the smallest. Thus, we choose <span class="math inline">\(\lambda\)</span> to be 12. The test RMSE is 16.467</p>
 <p>###Exercise 4</p>
 <pre class="r"><code>set.seed(7)
+
 lasso_spec &lt;- linear_reg(penalty = tune(), mixture = 1)%&gt;%
   set_engine(&quot;glmnet&quot;)
 
@@ -551,7 +569,22 @@ results &lt;- tune_grid(lasso_spec,
 ##  9      10 rmse    standard    19.1    10   0.881
 ## 10      11 rmse    standard    19.1    10   0.881
 ## # … with 91 more rows</code></pre>
-<p>It appears that when the penalty is 1, the test rmse is the lowest. The test rmse when the penalty is 1 is 17.356</p>
+<pre class="r"><code>lasso_spec &lt;- linear_reg(penalty = 1, mixture = 1)%&gt;%
+  set_engine(&quot;glmnet&quot;)
+lasso_fit &lt;- fit(lasso_spec,
+                 lat ~.,
+                 data = music_train)
+lasso_pred &lt;- lasso_fit %&gt;%
+  predict(new_data = music_test)%&gt;%
+  bind_cols(music_test)
+
+lasso_pred%&gt;%
+  rmse(truth=lat, estimate =.pred)</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   .metric .estimator .estimate
+##   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+## 1 rmse    standard        16.5</code></pre>
+<p>It appears that when the penalty is 1, the test rmse is the lowest. The test rmse when the penalty is 1 is 16.513</p>
 <p>###Exercise 5</p>
 <pre class="r"><code>set.seed(7)
 elasticNet_spec &lt;- linear_reg(penalty = tune(), mixture = tune())%&gt;%
@@ -642,11 +675,29 @@ results %&gt;%
 ##  9       3     0.4 rmse    standard    17.5    10   0.561
 ## 10       2     0.7 rmse    standard    17.5    10   0.596
 ## # … with 56 more rows</code></pre>
-<p>By examing the table, we can see that when <span class="math inline">\(\lambda\)</span> is 1 and when <span class="math inline">\(\alpha\)</span> is 1, the elastic net yields the lowest test rmse of 17.356.</p>
+<pre class="r"><code>elasticNet_spec &lt;- linear_reg(penalty = 1, mixture = 1)%&gt;%
+  set_engine(&quot;glmnet&quot;)
+
+elasticNet_fit &lt;- fit(elasticNet_spec,
+                      lat~.,
+                      data = music_train)
+
+elasticNet_pred &lt;- elasticNet_fit %&gt;%
+  predict(new_data = music_test)%&gt;%
+  bind_cols(music_test)
+
+elasticNet_pred%&gt;%
+  rmse(truth = lat, estimate = .pred)</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   .metric .estimator .estimate
+##   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+## 1 rmse    standard        16.5</code></pre>
+<p>By examing the table, we can see that when <span class="math inline">\(\lambda\)</span> is 1 and when <span class="math inline">\(\alpha\)</span> is 1, the elastic net yields the lowest test rmse of 16.513.</p>
 </div>
 <div id="exercise-6" class="section level3">
 <h3>Exercise 6</h3>
-<p>In the previous exercise, our elastic net has a test rmse of 17.356. RMSE can be used to measure model fit. As the square root of a variance, RMSE illustrates the standard deviation of the unexplained variance. 17.356 is relatively low, thus, it shows that our model fit is relatively good. It means that the square root of the average of squared differences between our predicted latitude and the actual latitud eis 17.356 degrees.</p>
+<p>The test RMSE for linear regression is 18.62 The test RMSE for ridge is 16.467 The test RMSE for lasso is 16.513</p>
+<p>In the previous exercise, our elastic net has a test rmse of 16.513. RMSE can be used to measure model fit. As the square root of a variance, RMSE illustrates the standard deviation of the unexplained variance. 16.513 is relatively low, thus, it shows that our model fit is relatively good. It means that the square root of the average of squared differences between our predicted latitude and the actual latitude is 16.513 degrees.</p>
 <p>There isn’t much differences among the 4 different approaches.</p>
 </div>
 

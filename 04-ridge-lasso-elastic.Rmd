@@ -100,12 +100,29 @@ tuning%>%
 
 ```
 
-It appears that when $\lambda = 12$ the test rmse is the smallest. The test rmse is 17.546. I will choose $\lambda$ to be 12, because this is when the test rmse become the smallest. 
+```{r get-rmse}
+ridge_spec <- linear_reg(penalty = 12, mixture = 0)%>%
+  set_engine("glmnet")
+
+ridge_fit <- fit(ridge_spec, 
+                 lat~.,
+                 data = music_train)
+
+ridge_pred <- ridge_fit %>%
+  predict(new_data = music_test)%>%
+  bind_cols(music_test)
+
+ridge_pred %>%
+  rmse(truth = lat, estimate = .pred)
+```
+
+When $\lambda$ is 12, the test root mean squared error is the smallest. Thus, we choose $\lambda$ to be 12. The test RMSE is 16.467 
 
 ###Exercise 4
 
 ```{r choosing-penalty-for-lasso}
 set.seed(7)
+
 lasso_spec <- linear_reg(penalty = tune(), mixture = 1)%>%
   set_engine("glmnet")
 
@@ -122,7 +139,22 @@ results %>%
 
 ```
 
-It appears that when the penalty is 1, the test rmse is the lowest. The test rmse when the penalty is 1 is 17.356
+```{r get-rmse2}
+lasso_spec <- linear_reg(penalty = 1, mixture = 1)%>%
+  set_engine("glmnet")
+lasso_fit <- fit(lasso_spec,
+                 lat ~.,
+                 data = music_train)
+lasso_pred <- lasso_fit %>%
+  predict(new_data = music_test)%>%
+  bind_cols(music_test)
+
+lasso_pred%>%
+  rmse(truth=lat, estimate =.pred)
+```
+
+
+It appears that when the penalty is 1, the test rmse is the lowest. The test rmse when the penalty is 1 is 16.513
 
 ###Exercise 5
 
@@ -197,12 +229,33 @@ results %>%
   arrange(mean)
 ```
 
-By examing the table, we can see that when $\lambda$ is 1 and when $\alpha$ is 1, the elastic net yields the lowest test rmse of 17.356. 
+```{r get-rmse3}
+elasticNet_spec <- linear_reg(penalty = 1, mixture = 1)%>%
+  set_engine("glmnet")
+
+elasticNet_fit <- fit(elasticNet_spec,
+                      lat~.,
+                      data = music_train)
+
+elasticNet_pred <- elasticNet_fit %>%
+  predict(new_data = music_test)%>%
+  bind_cols(music_test)
+
+elasticNet_pred%>%
+  rmse(truth = lat, estimate = .pred)
+```
+
+
+By examing the table, we can see that when $\lambda$ is 1 and when $\alpha$ is 1, the elastic net yields the lowest test rmse of 16.513. 
 
 
 ### Exercise 6
 
-In the previous exercise, our elastic net has a test rmse of 17.356. RMSE can be used to measure model fit. As the square root of a variance, RMSE illustrates the standard deviation of the unexplained variance. 17.356 is relatively low, thus, it shows that our model fit is relatively good. It means that the square root of the average of squared differences between our predicted latitude and the actual latitud eis 17.356 degrees. 
+The test RMSE for linear regression is 18.62
+The test RMSE for ridge is 16.467
+The test RMSE for lasso is 16.513
+
+In the previous exercise, our elastic net has a test rmse of 16.513. RMSE can be used to measure model fit. As the square root of a variance, RMSE illustrates the standard deviation of the unexplained variance. 16.513 is relatively low, thus, it shows that our model fit is relatively good. It means that the square root of the average of squared differences between our predicted latitude and the actual latitude is 16.513 degrees. 
 
 There isn't much differences among the 4 different approaches. 
 
