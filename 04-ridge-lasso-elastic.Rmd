@@ -53,6 +53,8 @@ lat_pred %>%
 
 The testing root men squared error obtained is 18.616
 
+Should have used last_fit(), but otherwise good: -3
+
 ### Exercise 3
 
 $@$ for 3-5 how do i use the testing portion of the initially split data. 
@@ -259,5 +261,7 @@ In the previous exercise, our elastic net has a test rmse of 16.513. RMSE can be
 
 There isn't much differences among the 4 different approaches. 
 
+But which model do you pick?: -3
 
+Grade: 94/100
 
